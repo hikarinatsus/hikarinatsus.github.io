@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ヒヒイロカネ進捗計算機</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: linear-gradient(180deg, #eef7ff 0%, #f8fbff 100%);
+      color: #1f2937;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .hero,
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+    }
+
+    .section-desc {
+      margin: -8px 0 16px;
+      color: #6b7280;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .ultima-grid,
+    .destruction-grid,
+    .bullet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .item-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 14px;
+      background: #f9fbff;
+      transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .item-name {
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .checks {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .element-card {
+      border-left-width: 8px;
+    }
+
+    .element-card.fire {
+      background: #fff5f5;
+      border-left: 8px solid #ef4444;
+    }
+
+    .element-card.water {
+      background: #eff6ff;
+      border-left: 8px solid #3b82f6;
+    }
+
+    .element-card.earth {
+      background: #fffbeb;
+      border-left: 8px solid #d97706;
+    }
+
+    .element-card.wind {
+      background: #f0fdf4;
+      border-left: 8px solid #22c55e;
+    }
+
+    .element-card.light {
+      background: #fffef0;
+      border-left: 8px solid #eab308;
+    }
+
+    .element-card.dark {
+      background: #faf5ff;
+      border-left: 8px solid #a855f7;
+    }
+
+    .skipped {
+      opacity: 0.55;
+      background: #f3f4f6 !important;
+      border-color: #d1d5db !important;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .field:last-child {
+      border-bottom: none;
+    }
+
+    .label-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .label {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .help {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #f9fafb;
+    }
+
+    input[type="number"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #60a5fa;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+    }
+
+    input[type="number"]:disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .result-box {
+      background: #f8fbff;
+      border: 1px solid #e5eefb;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .result-label {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .accent { color: #2563eb; }
+    .danger { color: #dc2626; }
+    .sub { color: #7c3aed; }
+    .gold { color: #b45309; }
+    .sky { color: #0284c7; }
+    .pink { color: #db2777; }
+
+    .progress-wrap {
+      margin-top: 18px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa 0%, #34d399 100%);
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
+
+    .note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      color: #9a3412;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .action-button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .copy-button {
+      background: #2563eb;
+    }
+
+    .reset-button {
+      background: #ef4444;
+    }
+
+    .action-button:hover {
+      opacity: 0.9;
+    }
+
+    .copy-area {
+      margin-top: 16px;
+    }
+
+    .copy-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    .footer {
+      color: #6b7280;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .result-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .grid-2,
+      .ultima-grid,
+      .destruction-grid,
+      .bullet-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field {
+        grid-template-columns: 1fr;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      input[type="number"],
+      textarea {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .checks {
+        gap: 10px;
+      }
+
+      .button-row {
+        justify-content: stretch;
+      }
+
+      .action-button {
+        width: 100%;
+      }
+    }
+
+      .toggle {
+    cursor: pointer;
+  }
+
+  .section-body.hidden {
+    display: none;
+  }
+
+  #topBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  background: #64748b;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+    position: sticky;
+  top: 10px;
+  z-index: 10;
+}
+
+.back-btn:hover {
+  opacity: 0.9;
+}
+
+.tweet-btn {
+  background: #1d9bf0;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.tweet-btn:hover {
+  opacity: 0.9;
+}
+
+.tweet-options {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+}
+
+.tweet-options-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.tweet-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+}
+
+.tweet-options-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: #374151;
+}
+
+@media (max-width: 720px) {
+  .tweet-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.collapse-header {
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: left;
+  padding: 0;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: #1f2937;
+}
+
+.collapse-header .arrow {
+  transition: transform 0.2s ease;
+}
+
+.collapsible:not(.open) .arrow {
+  transform: rotate(-90deg);
+}
+
+.collapsible:not(.open) .section-body {
+  display: none;
+}
+
+.floating-summary {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 220px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.floating-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.floating-body {
+  padding: 16px;
+}
+
+.floating-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-right: 36px;
+}
+
+.floating-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 0.92rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.floating-row:last-child {
+  border-bottom: none;
+}
+
+.floating-collapsed {
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.floating-summary.is-collapsed .floating-body {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .floating-summary {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+  }
+}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <a href="index.html" class="back-btn">← メインページへ戻る</a>
+    <a href="howto.html" class="back-btn">使い方</a>
+    <section class="hero">
+      <h1 class="title">ヒヒイロカネ進捗計算機</h1>
+      <p class="subtitle">
+        ヒヒイロカネの使用状況を記録して、総必要数76個に対する進捗を確認できます。<br />
+        十天衆・終末武器・破壊武器・バレット・極みスキン・十天光輝に対応しています。
+      </p>
+    </section>
+
+    <section class="card collapsible open">
+      <button class="collapse-header" type="button">
+        <span>十天衆</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="section-body">
+        <div class="grid-2" id="eternalGrid"></div>
+      </div>
+    </section>
+
+    <section class="card collapsible open">
+      <button class="collapse-header" type="button">
+        <span>終末武器</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="section-body">
+        <div class="ultima-grid" id="ultimaGrid"></div>
+       </div>
+    </section>
+
+    <section class="card collapsible open">
+      <button class="collapse-header" type="button">
+        <span>破壊武器</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="section-body">
+        <div class="destruction-grid" id="destructionGrid"></div>
+      </div>
+    </section>
+
+    <section class="card collapsible open">
+      <button class="collapse-header" type="button">
+        <span>バレット</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="section-body">
+        <div class="bullet-grid" id="bulletGrid"></div>
+      </div>
+    </section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>その他の入力</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="section-body">
+
+    <div class="item-card" id="skinCard" style="margin-bottom: 16px;">
+      <div class="item-name">極みスキン</div>
+      <div class="checks">
+        <label><input type="checkbox" id="skinCheck"> 入手</label>
+        <label><input type="checkbox" id="skinSkip"> 予定なし</label>
+      </div>
+      <div class="help" style="margin-top: 8px;">入手済みならヒヒ3個分として計算します。予定なしなら計算から除外します。</div>
+    </div>
+
+    <div class="field" id="koukiField">
+      <div class="label-wrap">
+        <label class="label" for="kouki">十天光輝</label>
+        <div class="help">0〜10で入力してください。予定なしなら計算から除外します。</div>
+      </div>
+      <input type="number" id="kouki" min="0" max="10" value="0" />
+    </div>
+
+    <div class="item-card" id="koukiSkipCard" style="margin-top: 16px;">
+      <div class="item-name">十天光輝の予定</div>
+      <div class="checks">
+        <label><input type="checkbox" id="koukiSkip"> 予定なし</label>
+      </div>
+    </div>
+
+    <div class="button-row">
+      <button class="action-button reset-button" id="resetButton" type="button">入力をリセット</button>
+    </div>
+  </div>
+</section>
+
+    <section class="card">
+      <h2 class="section-title">計算結果</h2>
+
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-label">総必要数</div>
+          <div class="result-value accent" id="targetResult">76</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">使用済み合計</div>
+          <div class="result-value sub" id="usedTotal">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">残り必要数</div>
+          <div class="result-value danger" id="remaining">76</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">十天110Lv人数</div>
+          <div class="result-value gold" id="transcendCount">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">終末超越本数</div>
+          <div class="result-value sky" id="ultimaTransCount">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">極みスキン</div>
+          <div class="result-value pink" id="skinResult">未入手</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-head">
+          <span>進捗率</span>
+          <span id="percentText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="note" id="message">
+        数値やチェックを変更すると自動で保存・計算されます。
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">コピペ用テキスト</h2>
+      <p class="section-desc">
+        ボタンを押すと進捗をまとめたテキストを生成して、そのままコピーできます。
+      </p>
+
+      <div class="button-row" style="margin-top: 0;">
+        <button class="action-button copy-button" id="copyButton" type="button">コピペ用を生成してコピー</button>
+      </div>
+
+      <div class="copy-area">
+        <label class="copy-label" for="copyText">生成テキスト</label>
+        <textarea id="copyText" readonly></textarea>
+      </div>
+
+<div class="tweet-options">
+  <div class="tweet-options-title">ツイートに入れる項目</div>
+  <div class="tweet-options-grid">
+    <label><input type="checkbox" id="tweetTarget"> 総必要数</label>
+    <label><input type="checkbox" id="tweetUsed" checked> 使用済み合計</label>
+    <label><input type="checkbox" id="tweetRemaining" checked> 残り必要数</label>
+    <label><input type="checkbox" id="tweetPercent" checked> 進捗率</label>
+    <label><input type="checkbox" id="tweetTrans"> 十天110Lv</label>
+    <label><input type="checkbox" id="tweetUltimaTrans"> 終末超越</label>
+    <label><input type="checkbox" id="tweetBullet"> バレット</label>
+    <label><input type="checkbox" id="tweetDestruction"> 破壊武器</label>
+    <label><input type="checkbox" id="tweetSkin"> 極みスキン</label>
+    <label><input type="checkbox" id="tweetKouki"> 十天光輝</label>
+    <label><input type="checkbox" id="tweetUrl" checked> URL</label>
+  </div>
+</div>
+
+      <button id="tweetBtn" class="tweet-btn">進捗をツイート</button>
+    </section>
+
+<div class="footer">
+
+  <div class="footer-links">
+    <a href="privacy.html">プライバシーポリシー</a>
+    <span>｜</span>
+    <a href="disclaimer.html">免責事項</a>
+    <span>｜</span>
+    <a href="contact.html">お問い合わせ</a>
+  </div>
+
+  <div class="floating-summary" id="floatingSummary">
+  <button class="floating-toggle" id="floatingToggle" type="button" aria-expanded="true">
+    −
+  </button>
+
+  <div class="floating-body" id="floatingBody">
+    <div class="floating-title">簡易結果</div>
+    <div class="floating-row">
+      <span>総必要数</span>
+      <strong id="floatingTarget">76</strong>
+    </div>
+    <div class="floating-row">
+      <span>使用済み</span>
+      <strong id="floatingUsed">0</strong>
+    </div>
+    <div class="floating-row">
+      <span>残り</span>
+      <strong id="floatingRemaining">76</strong>
+    </div>
+    <div class="floating-row">
+      <span>進捗率</span>
+      <strong id="floatingPercent">0%</strong>
+    </div>
+  </div>
+
+  <div class="floating-collapsed" id="floatingCollapsed" hidden>
+    残り <strong id="floatingRemainingMini">76</strong> 個
+  </div>
+</div>
+
+  <div class="footer-text">
+    本サイトはグランブルーファンタジーの非公式ファンツールです。<br>
+    株式会社Cygamesとは関係ありません。
+  </div>
+
+</div>
+  </main>
+<button id="topBtn">↑</button>
+  <script>
+    const STORAGE_KEY = "hihi-progress-data-v6";
+    const TOTAL_REQUIRED = 76;
+
+    const eternals = [
+      { name: "シエテ", element: "wind" },
+      { name: "ソーン", element: "light" },
+      { name: "サラーサ", element: "earth" },
+      { name: "カトル", element: "water" },
+      { name: "フュンフ", element: "light" },
+      { name: "シス", element: "dark" },
+      { name: "オクトー", element: "earth" },
+      { name: "ニオ", element: "wind" },
+      { name: "エッセル", element: "fire" },
+      { name: "ウーノ", element: "water" }
+    ];
+
+    const ultimas = [
+      { name: "火(マグナ)", element: "fire" },
+      { name: "火(神石)", element: "fire" },
+      { name: "水(マグナ)", element: "water" },
+      { name: "水(神石)", element: "water" },
+      { name: "土(マグナ)", element: "earth" },
+      { name: "土(神石)", element: "earth" },
+      { name: "風(マグナ)", element: "wind" },
+      { name: "風(神石)", element: "wind" },
+      { name: "光(マグナ)", element: "light" },
+      { name: "光(神石)", element: "light" },
+      { name: "闇(マグナ)", element: "dark" },
+      { name: "闇(神石)", element: "dark" }
+    ];
+
+    const destructionWeapons = [
+      { name: "火", element: "fire" },
+      { name: "水", element: "water" },
+      { name: "土", element: "earth" },
+      { name: "風", element: "wind" },
+      { name: "光", element: "light" },
+      { name: "闇", element: "dark" }
+    ];
+
+    const bullets = [
+      { name: "スパバハ弾" },
+      { name: "天元弾" },
+      { name: "ルシゼロ弾" }
+    ];
+
+    const eternalGrid = document.getElementById("eternalGrid");
+    const ultimaGrid = document.getElementById("ultimaGrid");
+    const destructionGrid = document.getElementById("destructionGrid");
+    const bulletGrid = document.getElementById("bulletGrid");
+    const floatingSummary = document.getElementById("floatingSummary");
+    const floatingToggle = document.getElementById("floatingToggle");
+    const floatingBody = document.getElementById("floatingBody");
+    const floatingCollapsed = document.getElementById("floatingCollapsed");
+
+    eternals.forEach((item, index) => {
+      eternalGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="join-check" data-index="${index}"> 加入</label>
+            <label><input type="checkbox" class="final-check" data-index="${index}"> 最終</label>
+            <label><input type="checkbox" class="trans-check" data-index="${index}"> 110Lv</label>
+          </div>
+        </div>
+      `);
+    });
+
+    ultimas.forEach((item, index) => {
+      ultimaGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="ultima-5-check" data-index="${index}"> 5凸</label>
+            <label><input type="checkbox" class="ultima-trans-check" data-index="${index}"> 限界超越</label>
+          </div>
+        </div>
+      `);
+    });
+
+    destructionWeapons.forEach((item, index) => {
+      destructionGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}">
+          <div class="item-name">${item.name}破壊武器</div>
+          <div class="checks">
+            <label><input type="checkbox" class="destruction-check" data-index="${index}"> 5凸</label>
+          </div>
+        </div>
+      `);
+    });
+
+    bullets.forEach((item, index) => {
+      bulletGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card" id="bulletCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="bullet-check" data-index="${index}"> 作成</label>
+            <label><input type="checkbox" class="bullet-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+        </div>
+      `);
+    });
+
+    const joinChecks = document.querySelectorAll(".join-check");
+    const finalChecks = document.querySelectorAll(".final-check");
+    const transChecks = document.querySelectorAll(".trans-check");
+    const ultima5Checks = document.querySelectorAll(".ultima-5-check");
+    const ultimaTransChecks = document.querySelectorAll(".ultima-trans-check");
+    const destructionChecks = document.querySelectorAll(".destruction-check");
+    const bulletChecks = document.querySelectorAll(".bullet-check");
+    const bulletSkipChecks = document.querySelectorAll(".bullet-skip-check");
+
+    const skinCheck = document.getElementById("skinCheck");
+    const skinSkip = document.getElementById("skinSkip");
+    const skinCard = document.getElementById("skinCard");
+
+    const koukiInput = document.getElementById("kouki");
+    const koukiSkip = document.getElementById("koukiSkip");
+    const koukiField = document.getElementById("koukiField");
+    const koukiSkipCard = document.getElementById("koukiSkipCard");
+
+    const numberInputs = [
+      koukiInput
+    ];
+
+    function getValue(id) {
+      return Number(document.getElementById(id).value) || 0;
+    }
+
+    function countChecked(nodeList) {
+      return Array.from(nodeList).filter(item => item.checked).length;
+    }
+
+    function clampKouki() {
+      let value = Number(koukiInput.value) || 0;
+
+      if (value < 0) value = 0;
+      if (value > 10) value = 10;
+
+      koukiInput.value = value;
+    }
+
+    function saveState() {
+      const data = {
+        join: Array.from(joinChecks).map(item => item.checked),
+        final: Array.from(finalChecks).map(item => item.checked),
+        trans: Array.from(transChecks).map(item => item.checked),
+        ultima5: Array.from(ultima5Checks).map(item => item.checked),
+        ultimaTrans: Array.from(ultimaTransChecks).map(item => item.checked),
+        destruction: Array.from(destructionChecks).map(item => item.checked),
+        bullets: Array.from(bulletChecks).map(item => item.checked),
+        bulletSkip: Array.from(bulletSkipChecks).map(item => item.checked),
+        skin: skinCheck.checked,
+        skinSkip: skinSkip.checked,
+        kouki: koukiInput.value,
+        koukiSkip: koukiSkip.checked
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+
+      try {
+        const data = JSON.parse(raw);
+
+        if (Array.isArray(data.join)) {
+          data.join.forEach((value, index) => {
+            if (joinChecks[index]) joinChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.final)) {
+          data.final.forEach((value, index) => {
+            if (finalChecks[index]) finalChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.trans)) {
+          data.trans.forEach((value, index) => {
+            if (transChecks[index]) transChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.ultima5)) {
+          data.ultima5.forEach((value, index) => {
+            if (ultima5Checks[index]) ultima5Checks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.ultimaTrans)) {
+          data.ultimaTrans.forEach((value, index) => {
+            if (ultimaTransChecks[index]) ultimaTransChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.destruction)) {
+          data.destruction.forEach((value, index) => {
+            if (destructionChecks[index]) destructionChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.bullets)) {
+          data.bullets.forEach((value, index) => {
+            if (bulletChecks[index]) bulletChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.bulletSkip)) {
+          data.bulletSkip.forEach((value, index) => {
+            if (bulletSkipChecks[index]) bulletSkipChecks[index].checked = value;
+          });
+        }
+
+        if (data.skin !== undefined) skinCheck.checked = data.skin;
+        if (data.skinSkip !== undefined) skinSkip.checked = data.skinSkip;
+        if (data.kouki !== undefined) koukiInput.value = data.kouki;
+        if (data.koukiSkip !== undefined) koukiSkip.checked = data.koukiSkip;
+      } catch (error) {
+        console.error("保存データの読み込みに失敗しました:", error);
+      }
+    }
+
+    function syncEternalHierarchy(index, changedLevel) {
+      const join = joinChecks[index];
+      const final = finalChecks[index];
+      const trans = transChecks[index];
+
+      if (changedLevel === "join" && !join.checked) {
+        final.checked = false;
+        trans.checked = false;
+      }
+
+      if (changedLevel === "final") {
+        if (final.checked) {
+          join.checked = true;
+        } else {
+          trans.checked = false;
+        }
+      }
+
+      if (changedLevel === "trans" && trans.checked) {
+        join.checked = true;
+        final.checked = true;
+      }
+    }
+
+    function syncUltimaHierarchy(index, changedLevel) {
+      const ultima5 = ultima5Checks[index];
+      const ultimaTrans = ultimaTransChecks[index];
+
+      if (changedLevel === "ultima5" && !ultima5.checked) {
+        ultimaTrans.checked = false;
+      }
+
+      if (changedLevel === "ultimaTrans" && ultimaTrans.checked) {
+        ultima5.checked = true;
+      }
+    }
+
+    function syncBulletState(index, changedType) {
+      const created = bulletChecks[index];
+      const skipped = bulletSkipChecks[index];
+
+      if (changedType === "created" && created.checked) {
+        skipped.checked = false;
+      }
+
+      if (changedType === "skipped" && skipped.checked) {
+        created.checked = false;
+      }
+    }
+
+    function updateSkippedStyles() {
+      bulletSkipChecks.forEach((check, index) => {
+        const card = document.getElementById(`bulletCard${index}`);
+        if (card) {
+          card.classList.toggle("skipped", check.checked);
+        }
+      });
+
+      skinCard.classList.toggle("skipped", skinSkip.checked);
+      koukiField.classList.toggle("skipped", koukiSkip.checked);
+      koukiSkipCard.classList.toggle("skipped", koukiSkip.checked);
+    }
+
+    function syncSkinState(changedType) {
+      if (changedType === "skin" && skinCheck.checked) {
+        skinSkip.checked = false;
+      }
+
+      if (changedType === "skip" && skinSkip.checked) {
+        skinCheck.checked = false;
+      }
+    }
+
+    function syncKoukiState() {
+      if (koukiSkip.checked) {
+        koukiInput.value = 0;
+        koukiInput.disabled = true;
+      } else {
+        koukiInput.disabled = false;
+      }
+    }
+
+    function getStats() {
+  clampKouki();
+
+  const joinCount = countChecked(joinChecks);
+  const finalCount = countChecked(finalChecks);
+  const transCount = countChecked(transChecks);
+
+  const ultima5Count = countChecked(ultima5Checks);
+  const ultimaTransCount = countChecked(ultimaTransChecks);
+
+  const destructionCount = countChecked(destructionChecks);
+  const bulletCount = countChecked(bulletChecks);
+
+  const bulletSkipCount = countChecked(bulletSkipChecks);
+  const skinCount = skinCheck.checked ? 3 : 0;
+  const skinSkipCount = skinSkip.checked ? 3 : 0;
+  const kouki = koukiSkip.checked ? 0 : getValue("kouki");
+  const koukiSkipCount = koukiSkip.checked ? 10 : 0;
+
+  const adjustedTotalRequired =
+    TOTAL_REQUIRED - bulletSkipCount - skinSkipCount - koukiSkipCount;
+
+  const usedTotal =
+    joinCount +
+    finalCount +
+    transCount +
+    ultima5Count +
+    ultimaTransCount +
+    destructionCount +
+    bulletCount +
+    skinCount +
+    kouki;
+
+  const remaining = Math.max(adjustedTotalRequired - usedTotal, 0);
+  const percent = adjustedTotalRequired === 0
+    ? 100
+    : Math.min(Math.floor((usedTotal / adjustedTotalRequired) * 100), 100);
+
+  return {
+    joinCount,
+    finalCount,
+    transCount,
+    ultima5Count,
+    ultimaTransCount,
+    destructionCount,
+    bulletCount,
+    bulletSkipCount,
+    skinCount,
+    skinSkipCount,
+    kouki,
+    koukiSkipCount,
+    usedTotal,
+    remaining,
+    percent,
+    adjustedTotalRequired
+  };
+}
+
+    function buildCopyText() {
+      const stats = getStats();
+
+      return [
+        "ヒヒ進捗",
+        `総必要数: ${stats.adjustedTotalRequired}`,
+        `使用済み合計: ${stats.usedTotal}`,
+        `残り必要数: ${stats.remaining}`,
+        `進捗率: ${stats.percent}%`,
+        `十天加入: ${stats.joinCount}/10`,
+        `十天最終: ${stats.finalCount}/10`,
+        `十天110Lv: ${stats.transCount}/10`,
+        `終末5凸: ${stats.ultima5Count}/12`,
+        `終末限界超越: ${stats.ultimaTransCount}/12`,
+        `破壊武器5凸: ${stats.destructionCount}/6`,
+        `バレット作成: ${stats.bulletCount}/3`,
+        `バレット予定なし: ${countChecked(bulletSkipChecks)}/3`,
+        `極みスキン: ${
+          skinCheck.checked
+            ? "入手済み(3個分)"
+            : skinSkip.checked
+              ? "予定なし"
+              : "未入手"
+        }`,
+        `十天光輝: ${koukiSkip.checked ? "予定なし" : `${stats.kouki}/10`}`
+      ].join("\n");
+    }
+
+    function calc() {
+      syncKoukiState();
+      updateSkippedStyles();
+
+      const stats = getStats();
+
+      document.getElementById("targetResult").textContent = stats.adjustedTotalRequired;
+      document.getElementById("usedTotal").textContent = stats.usedTotal;
+      document.getElementById("remaining").textContent = stats.remaining;
+      document.getElementById("transcendCount").textContent = stats.transCount;
+      document.getElementById("ultimaTransCount").textContent = stats.ultimaTransCount;
+      document.getElementById("floatingTarget").textContent = stats.adjustedTotalRequired;
+      document.getElementById("floatingUsed").textContent = stats.usedTotal;
+      document.getElementById("floatingRemaining").textContent = stats.remaining;
+      document.getElementById("floatingPercent").textContent = stats.percent + "%";
+      document.getElementById("floatingRemainingMini").textContent = stats.remaining;
+
+      if (skinCheck.checked) {
+        document.getElementById("skinResult").textContent = "入手済み";
+      } else if (skinSkip.checked) {
+        document.getElementById("skinResult").textContent = "予定なし";
+      } else {
+        document.getElementById("skinResult").textContent = "未入手";
+      }
+
+      document.getElementById("percentText").textContent = stats.percent + "%";
+      document.getElementById("progressBar").style.width = stats.percent + "%";
+      document.getElementById("copyText").value = buildCopyText();
+
+      const message = document.getElementById("message");
+
+      if (stats.usedTotal === 0) {
+        message.textContent = "数値やチェックを変更すると自動で保存・計算されます。";
+        message.style.background = "#fff7ed";
+        message.style.borderColor = "#fed7aa";
+        message.style.color = "#9a3412";
+      } else if (stats.remaining === 0) {
+        message.textContent = "総必要数76個ぶんは達成済みです。かなりつよい。";
+        message.style.background = "#ecfdf5";
+        message.style.borderColor = "#a7f3d0";
+        message.style.color = "#065f46";
+      } else {
+        message.textContent = `総必要数76個まであと ${stats.remaining} 個です。`;
+        message.style.background = "#fef2f2";
+        message.style.borderColor = "#fecaca";
+        message.style.color = "#991b1b";
+      }
+
+      saveState();
+    }
+
+    joinChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncEternalHierarchy(index, "join");
+        calc();
+      });
+    });
+
+    finalChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncEternalHierarchy(index, "final");
+        calc();
+      });
+    });
+
+    transChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncEternalHierarchy(index, "trans");
+        calc();
+      });
+    });
+
+    ultima5Checks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncUltimaHierarchy(index, "ultima5");
+        calc();
+      });
+    });
+
+    ultimaTransChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncUltimaHierarchy(index, "ultimaTrans");
+        calc();
+      });
+    });
+
+    destructionChecks.forEach(check => {
+      check.addEventListener("change", calc);
+    });
+
+    bulletChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncBulletState(index, "created");
+        calc();
+      });
+    });
+
+    bulletSkipChecks.forEach((check, index) => {
+      check.addEventListener("change", () => {
+        syncBulletState(index, "skipped");
+        calc();
+      });
+    });
+
+    skinCheck.addEventListener("change", () => {
+      syncSkinState("skin");
+      calc();
+    });
+
+    skinSkip.addEventListener("change", () => {
+      syncSkinState("skip");
+      calc();
+    });
+
+    koukiSkip.addEventListener("change", calc);
+
+    numberInputs.forEach(input => {
+      input.addEventListener("input", calc);
+    });
+
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      const text = buildCopyText();
+      const textarea = document.getElementById("copyText");
+      textarea.value = text;
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        textarea.select();
+        document.execCommand("copy");
+      }
+
+      const message = document.getElementById("message");
+      message.textContent = "コピペ用テキストをコピーしました。";
+      message.style.background = "#eff6ff";
+      message.style.borderColor = "#bfdbfe";
+      message.style.color = "#1d4ed8";
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      joinChecks.forEach(item => item.checked = false);
+      finalChecks.forEach(item => item.checked = false);
+      transChecks.forEach(item => item.checked = false);
+
+      ultima5Checks.forEach(item => item.checked = false);
+      ultimaTransChecks.forEach(item => item.checked = false);
+
+      destructionChecks.forEach(item => item.checked = false);
+
+      bulletChecks.forEach(item => item.checked = false);
+      bulletSkipChecks.forEach(item => item.checked = false);
+
+      skinCheck.checked = false;
+      skinSkip.checked = false;
+
+      koukiInput.value = 0;
+      koukiSkip.checked = false;
+      koukiInput.disabled = false;
+
+      localStorage.removeItem(STORAGE_KEY);
+      calc();
+    });
+
+    loadState();
+
+    joinChecks.forEach((_, index) => {
+      if (transChecks[index].checked) {
+        joinChecks[index].checked = true;
+        finalChecks[index].checked = true;
+      } else if (finalChecks[index].checked) {
+        joinChecks[index].checked = true;
+      }
+    });
+
+    ultima5Checks.forEach((_, index) => {
+      if (ultimaTransChecks[index].checked) {
+        ultima5Checks[index].checked = true;
+      }
+    });
+
+    bulletChecks.forEach((_, index) => {
+      if (bulletChecks[index].checked) {
+        bulletSkipChecks[index].checked = false;
+      } else if (bulletSkipChecks[index].checked) {
+        bulletChecks[index].checked = false;
+      }
+    });
+
+    if (skinCheck.checked) {
+      skinSkip.checked = false;
+    }
+
+    syncKoukiState();
+    updateSkippedStyles();
+    calc();
+
+    document.querySelectorAll(".collapse-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const section = header.closest(".collapsible");
+        section.classList.toggle("open");
+  });
+});
+
+document.getElementById("topBtn").addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+document.getElementById("tweetBtn").addEventListener("click", () => {
+  const text = encodeURIComponent(buildTweetText());
+  const url = `https://twitter.com/intent/tweet?text=${text}`;
+  window.open(url, "_blank");
+});
+
+function buildTweetText() {
+  const stats = getStats();
+  const lines = ["ヒヒ進捗"];
+
+  if (document.getElementById("tweetTarget").checked) {
+    lines.push(`総必要数: ${stats.adjustedTotalRequired}`);
+  }
+
+  if (document.getElementById("tweetUsed").checked) {
+    lines.push(`使用済み: ${stats.usedTotal}`);
+  }
+
+  if (document.getElementById("tweetRemaining").checked) {
+    lines.push(`残り: ${stats.remaining}`);
+  }
+
+  if (document.getElementById("tweetPercent").checked) {
+    lines.push(`進捗率: ${stats.percent}%`);
+  }
+
+  if (document.getElementById("tweetTrans").checked) {
+    lines.push(`十天110Lv: ${stats.transCount}/10`);
+  }
+
+  if (document.getElementById("tweetUltimaTrans").checked) {
+    lines.push(`終末超越: ${stats.ultimaTransCount}/12`);
+  }
+
+  if (document.getElementById("tweetBullet").checked) {
+    lines.push(`バレット: ${stats.bulletCount}/3`);
+  }
+
+  if (document.getElementById("tweetDestruction").checked) {
+  lines.push(`破壊武器: ${stats.destructionCount}/6`);
+}
+
+  if (document.getElementById("tweetSkin").checked) {
+    const skinText = skinCheck.checked ? "入手済み" : skinSkip.checked ? "予定なし" : "未入手";
+    lines.push(`極みスキン: ${skinText}`);
+  }
+
+  if (document.getElementById("tweetKouki").checked) {
+    lines.push(`十天光輝: ${koukiSkip.checked ? "予定なし" : `${stats.kouki}/10`}`);
+  }
+
+  if (document.getElementById("tweetUrl").checked) {
+    lines.push(location.href);
+  }
+
+  lines.push("#ヒヒ電卓");
+
+  return lines.join("\n");
+}
+
+let floatingClosed = false;
+
+function updateFloatingSummary() {
+  floatingSummary.classList.toggle("is-collapsed", floatingClosed);
+  floatingBody.hidden = floatingClosed;
+  floatingCollapsed.hidden = !floatingClosed;
+  floatingToggle.textContent = floatingClosed ? "+" : "−";
+  floatingToggle.setAttribute("aria-expanded", String(!floatingClosed));
+}
+
+floatingToggle.addEventListener("click", () => {
+  floatingClosed = !floatingClosed;
+  updateFloatingSummary();
+});
+
+floatingCollapsed.addEventListener("click", () => {
+  floatingClosed = false;
+  updateFloatingSummary();
+});
+
+updateFloatingSummary();
+  </script>
+</body>
+</html>

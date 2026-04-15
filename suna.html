@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>刻の流砂進捗計算機</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: linear-gradient(180deg, #eef7ff 0%, #f8fbff 100%);
+      color: #1f2937;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .hero,
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      display: inline-block;
+      padding: 8px 14px;
+      background: #64748b;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      opacity: 0.85;
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+    }
+
+    .section-desc {
+      margin: -8px 0 16px;
+      color: #6b7280;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .item-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 14px;
+      background: #f9fbff;
+      transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .item-name {
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .checks {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .item-help {
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .element-card {
+      border-left-width: 8px;
+    }
+
+    .element-card.fire {
+      background: #fff5f5;
+      border-left: 8px solid #ef4444;
+    }
+
+    .element-card.water {
+      background: #eff6ff;
+      border-left: 8px solid #3b82f6;
+    }
+
+    .element-card.earth {
+      background: #fffbeb;
+      border-left: 8px solid #d97706;
+    }
+
+    .element-card.wind {
+      background: #f0fdf4;
+      border-left: 8px solid #22c55e;
+    }
+
+    .element-card.light {
+      background: #fffef0;
+      border-left: 8px solid #eab308;
+    }
+
+    .element-card.dark {
+      background: #faf5ff;
+      border-left: 8px solid #a855f7;
+    }
+
+    .skipped {
+      opacity: 0.55;
+      background: #f3f4f6 !important;
+      border-color: #d1d5db !important;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .field:last-child {
+      border-bottom: none;
+    }
+
+    .label-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .label {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .help {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #f9fafb;
+    }
+
+    input[type="number"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #60a5fa;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+    }
+
+    input[type="number"]:disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .result-box {
+      background: #f8fbff;
+      border: 1px solid #e5eefb;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .result-label {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .accent { color: #2563eb; }
+    .danger { color: #dc2626; }
+    .sub { color: #7c3aed; }
+    .gold { color: #b45309; }
+    .sky { color: #0284c7; }
+    .pink { color: #db2777; }
+
+    .progress-wrap {
+      margin-top: 18px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa 0%, #34d399 100%);
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
+
+    .note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      color: #9a3412;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .action-button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .copy-button {
+      background: #2563eb;
+    }
+
+    .reset-button {
+      background: #ef4444;
+    }
+
+    .action-button:hover {
+      opacity: 0.9;
+    }
+
+    .copy-area {
+      margin-top: 16px;
+    }
+
+    .copy-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    .footer {
+      color: #6b7280;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .result-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .field {
+        grid-template-columns: 1fr;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      input[type="number"],
+      textarea {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .checks {
+        gap: 10px;
+      }
+
+      .button-row {
+        justify-content: stretch;
+      }
+
+      .action-button {
+        width: 100%;
+      }
+    }
+
+    .floating-summary {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 220px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.floating-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.floating-body {
+  padding: 16px;
+}
+
+.floating-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-right: 36px;
+}
+
+.floating-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 0.92rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.floating-row:last-child {
+  border-bottom: none;
+}
+
+.floating-collapsed {
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.floating-summary.is-collapsed .floating-body {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .floating-summary {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+  }
+}
+
+.tweet-btn {
+  background: #1d9bf0;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.tweet-btn:hover {
+  opacity: 0.9;
+}
+
+.tweet-options {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+}
+
+.tweet-options-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.tweet-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+}
+
+.tweet-options-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: #374151;
+}
+
+@media (max-width: 720px) {
+  .tweet-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.collapse-header {
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: left;
+  padding: 0;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.collapse-header .arrow {
+  transition: transform 0.2s;
+}
+
+.collapsible:not(.open) .arrow {
+  transform: rotate(-90deg);
+}
+
+.collapse-content {
+  overflow: hidden;
+}
+
+.collapsible:not(.open) .collapse-content {
+  display: none;
+}
+
+.monthly-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.monthly-inline input[type="number"] {
+  width: 120px;
+}
+
+.monthly-skip-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: #374151;
+  white-space: nowrap;
+}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="nav-buttons">
+      <a href="index.html" class="back-btn">← メイン</a>
+      <a href="howto.html" class="back-btn">使い方</a>
+    </div>
+
+    <section class="hero">
+      <h1 class="title">刻の流砂進捗計算機</h1>
+      <p class="subtitle">
+        刻の流砂の使用状況を記録して、総必要数に対する進捗を確認できます。<br />
+        バハムート・ルシフェル・マグナ召喚石・礎武器・終末武器・ドラポン・破壊武器・バレット・月交換などに対応しています。
+      </p>
+    </section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>プロヴィデンス召喚石</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="summonGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>マグナ召喚石</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="magnaGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>礎武器</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="astralGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>終末武器 Lv250</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="ultimaGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>ドラゴニックウェポンオリジン</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="dragonicGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>破壊武器</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-2" id="destructionGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>その他</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-3" id="otherGrid"></div>
+  </div>
+</section>
+
+<section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>英雄武器</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-3" id="heroGrid"></div>
+  </div>
+</section>
+
+    <section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>バレット</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="grid-3" id="bulletGrid"></div>
+  </div>
+</section>
+
+<section class="card collapsible open">
+  <button class="collapse-header" type="button">
+    <span>月交換</span>
+    <span class="arrow">▼</span>
+  </button>
+
+  <div class="collapse-content">
+    <div class="field" id="monthlyField">
+      <div class="label-wrap">
+        <label class="label" for="monthlyExchange">交換予定数</label>
+        <div class="help">0以上の整数で入力してください</div>
+      </div>
+
+      <div class="monthly-inline">
+        <input type="number" id="monthlyExchange" min="0" value="0" />
+        <label class="monthly-skip-inline">
+          <input type="checkbox" id="monthlySkip"> 予定なし
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <section class="card" id="resultCard">
+      <h2 class="section-title">計算結果</h2>
+
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-label">総必要数</div>
+          <div class="result-value accent" id="targetResult">185</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">使用済み合計</div>
+          <div class="result-value sub" id="usedTotal">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">残り必要数</div>
+          <div class="result-value danger" id="remaining">185</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">バハ段階数</div>
+          <div class="result-value gold" id="bahamutCount">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">ルシ段階数</div>
+          <div class="result-value sky" id="luciferCount">0</div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-label">マグナ段階数</div>
+          <div class="result-value pink" id="magnaCount">0</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-head">
+          <span>進捗率</span>
+          <span id="percentText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="note" id="message">
+        数値やチェックを変更すると自動で保存・計算されます。
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">コピペ用テキスト</h2>
+      <p class="section-desc">
+        ボタンを押すと進捗をまとめたテキストを生成して、そのままコピーできます。
+      </p>
+
+      <div class="button-row" style="margin-top: 0;">
+        <button class="action-button copy-button" id="copyButton" type="button">コピペ用を生成してコピー</button>
+        <button class="action-button reset-button" id="resetButton" type="button">入力をリセット</button>
+      </div>
+
+      <div class="copy-area">
+        <label class="copy-label" for="copyText">生成テキスト</label>
+        <textarea id="copyText" readonly></textarea>
+
+        <div class="tweet-options">
+  <div class="tweet-options-title">ツイートに入れる項目</div>
+  <div class="tweet-options-grid">
+    <label><input type="checkbox" id="tweetTarget"> 総必要数</label>
+    <label><input type="checkbox" id="tweetUsed" checked> 使用済み合計</label>
+    <label><input type="checkbox" id="tweetRemaining" checked> 残り必要数</label>
+    <label><input type="checkbox" id="tweetPercent" checked> 進捗率</label>
+    <label><input type="checkbox" id="tweetBahamut"> バハ段階</label>
+    <label><input type="checkbox" id="tweetLucifer"> ルシ段階</label>
+    <label><input type="checkbox" id="tweetMagna"> マグナ段階</label>
+    <label><input type="checkbox" id="tweetAstral"> 礎武器</label>
+    <label><input type="checkbox" id="tweetUltima"> 終末250</label>
+    <label><input type="checkbox" id="tweetDragonic"> ドラポン</label>
+    <label><input type="checkbox" id="tweetHero"> 英雄武器</label>
+    <label><input type="checkbox" id="tweetDestruction"> 破壊武器</label>
+    <label><input type="checkbox" id="tweetBullet"> バレット</label>
+    <label><input type="checkbox" id="tweetUrl" checked> URL</label>
+  </div>
+</div>
+
+<button id="tweetBtn" class="tweet-btn" type="button">進捗をツイート</button>
+      </div>
+    </section>
+
+    <div class="floating-summary" id="floatingSummary">
+  <button class="floating-toggle" id="floatingToggle" type="button" aria-expanded="true">
+    −
+  </button>
+
+  <div class="floating-body" id="floatingBody">
+    <div class="floating-title">簡易結果</div>
+    <div class="floating-row">
+      <span>総必要数</span>
+      <strong id="floatingTarget">185</strong>
+    </div>
+    <div class="floating-row">
+      <span>使用済み</span>
+      <strong id="floatingUsed">0</strong>
+    </div>
+    <div class="floating-row">
+      <span>残り</span>
+      <strong id="floatingRemaining">185</strong>
+    </div>
+    <div class="floating-row">
+      <span>進捗率</span>
+      <strong id="floatingPercent">0%</strong>
+    </div>
+  </div>
+
+  <div class="floating-collapsed" id="floatingCollapsed" hidden>
+    残り <strong id="floatingRemainingMini">185</strong> 個
+  </div>
+</div>
+    
+
+    <div class="footer">
+      本ツールの計算結果は参考値です。<br />
+      仕様変更や計算ミスにより、実際の必要数と異なる場合があります。<br />
+      素材の使用は自己責任でお願いします。
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "suna-progress-data-v1";
+    const STAGE_LABELS = ["210", "220", "230", "240", "250"];
+    const MAGNA_STAGE_LABELS = ["230", "240", "250"];
+    const DESTRUCTION_STAGE_LABELS = [
+      { key: "exchange", label: "交換", weight: 2 },
+      { key: "uncap4", label: "4凸", weight: 3 },
+      { key: "uncap5", label: "5凸", weight: 5 }
+    ];
+
+    const summons = [
+      { key: "bahamut", name: "バハムート", maxWeight: 15 },
+      { key: "lucifer", name: "ルシフェル", maxWeight: 15 }
+    ];
+
+    const magna = [
+      { key: "fire", name: "火", element: "fire", maxWeight: 3 },
+      { key: "water", name: "水", element: "water", maxWeight: 3 },
+      { key: "earth", name: "土", element: "earth", maxWeight: 3 },
+      { key: "wind", name: "風", element: "wind", maxWeight: 3 },
+      { key: "light", name: "光", element: "light", maxWeight: 3 },
+      { key: "dark", name: "闇", element: "dark", maxWeight: 3 }
+    ];
+
+    const astrals = [
+      "礎武器1", "礎武器2", "礎武器3", "礎武器4", "礎武器5",
+      "礎武器6", "礎武器7", "礎武器8", "礎武器9", "礎武器10"
+    ];
+
+    const ultimas = [
+      { name: "火(マグナ)", element: "fire" },
+      { name: "火(神石)", element: "fire" },
+      { name: "水(マグナ)", element: "water" },
+      { name: "水(神石)", element: "water" },
+      { name: "土(マグナ)", element: "earth" },
+      { name: "土(神石)", element: "earth" },
+      { name: "風(マグナ)", element: "wind" },
+      { name: "風(神石)", element: "wind" },
+      { name: "光(マグナ)", element: "light" },
+      { name: "光(神石)", element: "light" },
+      { name: "闇(マグナ)", element: "dark" },
+      { name: "闇(神石)", element: "dark" }
+    ];
+
+    const dragonics = [
+      { name: "火", element: "fire" },
+      { name: "水", element: "water" },
+      { name: "土", element: "earth" },
+      { name: "風", element: "wind" },
+      { name: "光", element: "light" },
+      { name: "闇", element: "dark" }
+    ];
+
+    const destructionWeapons = [
+      { name: "火", element: "fire", maxWeight: 10 },
+      { name: "水", element: "water", maxWeight: 10 },
+      { name: "土", element: "earth", maxWeight: 10 },
+      { name: "風", element: "wind", maxWeight: 10 },
+      { name: "光", element: "light", maxWeight: 10 },
+      { name: "闇", element: "dark", maxWeight: 10 }
+    ];
+
+    const heroWeapons = [
+  { key: "hero1", name: "ノルデン･ラブリュス(ヴァイキング)", weight: 1 },
+  { key: "hero2", name: "ロイヤル･ブリンガー(パラディン)", weight: 1 },
+  { key: "hero3", name: "ウラニアスフェラ･ラヴドス(パナケイア)", weight: 1 },
+  { key: "hero4", name: "コメーテス･シーカ(マナダイバー)", weight: 1 },
+  { key: "hero5", name: "ダイアデム･ムーリネ(キング)", weight: 1 },
+  { key: "hero6", name: "陰陽之霊刀(陰陽師)", weight: 1 },
+  { key: "hero7", name: "ルクス･イン･デネブリス(ブギーマン)", weight: 1 },
+  { key: "hero8", name: "鎖断鉄鋼拳(スマヒヒト)", weight: 1 },
+  { key: "hero9", name: "ギタロン･マエストロ(マリアッチ)", weight: 1 }
+];
+
+const otherItems = [
+  { key: "ouroboros", name: "ウロボロス・ミニステル", weight: 1 },
+  { key: "origin1", name: "オリジンファイター", weight: 1 },
+  { key: "origin2", name: "オリジンランサー", weight: 1 },
+  { key: "origin3", name: "オリジンウィザード", weight: 1 }
+];
+
+    const bullets = [
+      { key: "luciBullet", name: "ルシゼロ弾", weight: 3 },
+      { key: "tengenBullet", name: "天元弾", weight: 3 },
+      { key: "tengenAetherial", name: "天元エーテリアル弾", weight: 1 }
+    ];
+
+    const summonGrid = document.getElementById("summonGrid");
+    const magnaGrid = document.getElementById("magnaGrid");
+    const astralGrid = document.getElementById("astralGrid");
+    const ultimaGrid = document.getElementById("ultimaGrid");
+    const dragonicGrid = document.getElementById("dragonicGrid");
+    const destructionGrid = document.getElementById("destructionGrid");
+    const otherGrid = document.getElementById("otherGrid");
+    const heroGrid = document.getElementById("heroGrid");
+    const bulletGrid = document.getElementById("bulletGrid");
+    const floatingSummary = document.getElementById("floatingSummary");
+    const floatingToggle = document.getElementById("floatingToggle");
+    const floatingBody = document.getElementById("floatingBody");
+    const floatingCollapsed = document.getElementById("floatingCollapsed");
+
+    summons.forEach((item, index) => {
+      summonGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card" id="summonCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            ${STAGE_LABELS.map((label, stageIndex) => `
+              <label><input type="checkbox" class="summon-stage-check" data-index="${index}" data-stage="${stageIndex}"> ${label}</label>
+            `).join("")}
+            <label><input type="checkbox" class="summon-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">各段階ごとに 3 個使用します。</div>
+        </div>
+      `);
+    });
+
+    magna.forEach((item, index) => {
+      magnaGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}" id="magnaCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            ${MAGNA_STAGE_LABELS.map((label, stageIndex) => `
+              <label><input type="checkbox" class="magna-stage-check" data-index="${index}" data-stage="${stageIndex}"> ${label}</label>
+            `).join("")}
+            <label><input type="checkbox" class="magna-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">各段階ごとに 1 個使用します。</div>
+        </div>
+      `);
+    });
+
+    astrals.forEach((name, index) => {
+      astralGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card" id="astralCard${index}">
+          <div class="item-name">${name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="astral-check" data-index="${index}"> 5凸</label>
+            <label><input type="checkbox" class="astral-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">1本ごとに 3 個使用します。</div>
+        </div>
+      `);
+    });
+
+    ultimas.forEach((item, index) => {
+      ultimaGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}" id="ultimaCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="ultima-check" data-index="${index}"> Lv250</label>
+            <label><input type="checkbox" class="ultima-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">1本ごとに 1 個使用します。</div>
+        </div>
+      `);
+    });
+
+    dragonics.forEach((item, index) => {
+      dragonicGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}" id="dragonicCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="dragonic-check" data-index="${index}"> オリジン強化</label>
+            <label><input type="checkbox" class="dragonic-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">1本ごとに 1 個使用します。</div>
+        </div>
+      `);
+    });
+
+    destructionWeapons.forEach((item, index) => {
+      destructionGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card element-card ${item.element}" id="destructionCard${index}">
+          <div class="item-name">${item.name}破壊武器</div>
+          <div class="checks">
+            ${DESTRUCTION_STAGE_LABELS.map((stage, stageIndex) => `
+              <label><input type="checkbox" class="destruction-stage-check" data-index="${index}" data-stage="${stageIndex}"> ${stage.label}</label>
+            `).join("")}
+            <label><input type="checkbox" class="destruction-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">交換 2 個 / 4凸 3 個 / 5凸 5 個で計算します。</div>
+        </div>
+      `);
+    });
+
+    otherItems.forEach((item, index) => {
+      otherGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card" id="otherCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="other-check" data-index="${index}"> 達成</label>
+            <label><input type="checkbox" class="other-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">1個で計算します。</div>
+        </div>
+      `);
+    });
+
+    heroWeapons.forEach((item, index) => {
+  heroGrid.insertAdjacentHTML("beforeend", `
+    <div class="item-card" id="heroCard${index}">
+      <div class="item-name">${item.name}</div>
+      <div class="checks">
+        <label>
+          <input type="checkbox" class="hero-atk-check" data-index="${index}">
+          攻撃
+        </label>
+        <label>
+          <input type="checkbox" class="hero-def-check" data-index="${index}">
+          防御
+        </label>
+        <label>
+          <input type="checkbox" class="hero-skip-check" data-index="${index}">
+          予定なし
+        </label>
+      </div>
+      <div class="item-help">各1個で計算</div>
+    </div>
+  `);
+});
+
+    bullets.forEach((item, index) => {
+      bulletGrid.insertAdjacentHTML("beforeend", `
+        <div class="item-card" id="bulletCard${index}">
+          <div class="item-name">${item.name}</div>
+          <div class="checks">
+            <label><input type="checkbox" class="bullet-check" data-index="${index}"> 作成</label>
+            <label><input type="checkbox" class="bullet-skip-check" data-index="${index}"> 予定なし</label>
+          </div>
+          <div class="item-help">${item.weight} 個で計算します。</div>
+        </div>
+      `);
+    });
+
+    const summonStageChecks = document.querySelectorAll(".summon-stage-check");
+    const summonSkipChecks = document.querySelectorAll(".summon-skip-check");
+
+    const magnaStageChecks = document.querySelectorAll(".magna-stage-check");
+    const magnaSkipChecks = document.querySelectorAll(".magna-skip-check");
+
+    const astralChecks = document.querySelectorAll(".astral-check");
+    const astralSkipChecks = document.querySelectorAll(".astral-skip-check");
+
+    const ultimaChecks = document.querySelectorAll(".ultima-check");
+    const ultimaSkipChecks = document.querySelectorAll(".ultima-skip-check");
+
+    const dragonicChecks = document.querySelectorAll(".dragonic-check");
+    const dragonicSkipChecks = document.querySelectorAll(".dragonic-skip-check");
+
+    const destructionStageChecks = document.querySelectorAll(".destruction-stage-check");
+    const destructionSkipChecks = document.querySelectorAll(".destruction-skip-check");
+
+    const heroAtkChecks = document.querySelectorAll(".hero-atk-check");
+    const heroDefChecks = document.querySelectorAll(".hero-def-check");
+    const heroSkipChecks = document.querySelectorAll(".hero-skip-check");
+
+    const otherChecks = document.querySelectorAll(".other-check");
+    const otherSkipChecks = document.querySelectorAll(".other-skip-check");
+
+    const bulletChecks = document.querySelectorAll(".bullet-check");
+    const bulletSkipChecks = document.querySelectorAll(".bullet-skip-check");
+
+    const monthlyExchangeInput = document.getElementById("monthlyExchange");
+    const monthlySkip = document.getElementById("monthlySkip");
+    const monthlyField = document.getElementById("monthlyField");
+
+    function countChecked(nodeList) {
+      return Array.from(nodeList).filter(item => item.checked).length;
+    }
+
+    function sumWeightsByChecked(nodeList, weights) {
+      return Array.from(nodeList).reduce((sum, input, idx) => {
+        return sum + (input.checked ? weights[idx] : 0);
+      }, 0);
+    }
+
+    function clampMonthly() {
+      let value = Number(monthlyExchangeInput.value) || 0;
+      if (value < 0) value = 0;
+      monthlyExchangeInput.value = value;
+    }
+
+    function getGroupNodes(nodeList, index) {
+      return Array.from(nodeList).filter(input => Number(input.dataset.index) === index);
+    }
+
+    function syncSequentialGroup(nodeList, index, changedStage) {
+      const group = getGroupNodes(nodeList, index).sort((a, b) => Number(a.dataset.stage) - Number(b.dataset.stage));
+      const changed = group.find(input => Number(input.dataset.stage) === changedStage);
+      if (!changed) return;
+
+      if (changed.checked) {
+        group.forEach(input => {
+          if (Number(input.dataset.stage) <= changedStage) {
+            input.checked = true;
+          }
+        });
+      } else {
+        group.forEach(input => {
+          if (Number(input.dataset.stage) >= changedStage) {
+            input.checked = false;
+          }
+        });
+      }
+    }
+
+    function syncSkipPair(mainInput, skipInput) {
+      if (mainInput.checked) {
+        skipInput.checked = false;
+      }
+    }
+
+    function clearGroup(nodeList, index) {
+      getGroupNodes(nodeList, index).forEach(input => {
+        input.checked = false;
+      });
+    }
+
+    function updateSkippedStyles() {
+      summons.forEach((_, index) => {
+        document.getElementById(`summonCard${index}`)?.classList.toggle("skipped", summonSkipChecks[index].checked);
+      });
+
+      magna.forEach((_, index) => {
+        document.getElementById(`magnaCard${index}`)?.classList.toggle("skipped", magnaSkipChecks[index].checked);
+      });
+
+      astrals.forEach((_, index) => {
+        document.getElementById(`astralCard${index}`)?.classList.toggle("skipped", astralSkipChecks[index].checked);
+      });
+
+      ultimas.forEach((_, index) => {
+        document.getElementById(`ultimaCard${index}`)?.classList.toggle("skipped", ultimaSkipChecks[index].checked);
+      });
+
+      dragonics.forEach((_, index) => {
+        document.getElementById(`dragonicCard${index}`)?.classList.toggle("skipped", dragonicSkipChecks[index].checked);
+      });
+
+      destructionWeapons.forEach((_, index) => {
+        document.getElementById(`destructionCard${index}`)?.classList.toggle("skipped", destructionSkipChecks[index].checked);
+      });
+
+      heroWeapons.forEach((_, index) => {
+        document.getElementById(`heroCard${index}`)?.classList.toggle("skipped", heroSkipChecks[index].checked);
+      });
+
+      otherItems.forEach((_, index) => {
+        document.getElementById(`otherCard${index}`)?.classList.toggle("skipped", otherSkipChecks[index].checked);
+      });
+
+      bullets.forEach((_, index) => {
+        document.getElementById(`bulletCard${index}`)?.classList.toggle("skipped", bulletSkipChecks[index].checked);
+      });
+
+      monthlyField.classList.toggle("skipped", monthlySkip.checked);
+    }
+
+    function syncMonthlyState() {
+      if (monthlySkip.checked) {
+        monthlyExchangeInput.value = 0;
+        monthlyExchangeInput.disabled = true;
+      } else {
+        monthlyExchangeInput.disabled = false;
+      }
+    }
+
+    function saveState() {
+      const data = {
+        summonStages: Array.from(summonStageChecks).map(input => input.checked),
+        summonSkip: Array.from(summonSkipChecks).map(input => input.checked),
+
+        magnaStages: Array.from(magnaStageChecks).map(input => input.checked),
+        magnaSkip: Array.from(magnaSkipChecks).map(input => input.checked),
+
+        astral: Array.from(astralChecks).map(input => input.checked),
+        astralSkip: Array.from(astralSkipChecks).map(input => input.checked),
+
+        ultima: Array.from(ultimaChecks).map(input => input.checked),
+        ultimaSkip: Array.from(ultimaSkipChecks).map(input => input.checked),
+
+        dragonic: Array.from(dragonicChecks).map(input => input.checked),
+        dragonicSkip: Array.from(dragonicSkipChecks).map(input => input.checked),
+
+        destructionStages: Array.from(destructionStageChecks).map(input => input.checked),
+        destructionSkip: Array.from(destructionSkipChecks).map(input => input.checked),
+
+        heroAtk: Array.from(heroAtkChecks).map(input => input.checked),
+        heroDef: Array.from(heroDefChecks).map(input => input.checked),
+        heroSkip: Array.from(heroSkipChecks).map(input => input.checked),
+
+        other: Array.from(otherChecks).map(input => input.checked),
+        otherSkip: Array.from(otherSkipChecks).map(input => input.checked),
+
+        bullets: Array.from(bulletChecks).map(input => input.checked),
+        bulletSkip: Array.from(bulletSkipChecks).map(input => input.checked),
+
+        monthlyExchange: monthlyExchangeInput.value,
+        monthlySkip: monthlySkip.checked,
+
+        tweetOptions: {
+  target: document.getElementById("tweetTarget")?.checked ?? false,
+  used: document.getElementById("tweetUsed")?.checked ?? true,
+  remaining: document.getElementById("tweetRemaining")?.checked ?? true,
+  percent: document.getElementById("tweetPercent")?.checked ?? true,
+  bahamut: document.getElementById("tweetBahamut")?.checked ?? false,
+  lucifer: document.getElementById("tweetLucifer")?.checked ?? false,
+  magna: document.getElementById("tweetMagna")?.checked ?? false,
+  astral: document.getElementById("tweetAstral")?.checked ?? false,
+  ultima: document.getElementById("tweetUltima")?.checked ?? false,
+  dragonic: document.getElementById("tweetDragonic")?.checked ?? false,
+  destruction: document.getElementById("tweetDestruction")?.checked ?? false,
+  bullet: document.getElementById("tweetBullet")?.checked ?? false,
+  monthly: document.getElementById("tweetMonthly")?.checked ?? false,
+  url: document.getElementById("tweetUrl")?.checked ?? true
+}
+      };
+      
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+
+      try {
+        const data = JSON.parse(raw);
+
+        if (Array.isArray(data.summonStages)) {
+          data.summonStages.forEach((value, index) => {
+            if (summonStageChecks[index]) summonStageChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.summonSkip)) {
+          data.summonSkip.forEach((value, index) => {
+            if (summonSkipChecks[index]) summonSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.magnaStages)) {
+          data.magnaStages.forEach((value, index) => {
+            if (magnaStageChecks[index]) magnaStageChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.magnaSkip)) {
+          data.magnaSkip.forEach((value, index) => {
+            if (magnaSkipChecks[index]) magnaSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.astral)) {
+          data.astral.forEach((value, index) => {
+            if (astralChecks[index]) astralChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.astralSkip)) {
+          data.astralSkip.forEach((value, index) => {
+            if (astralSkipChecks[index]) astralSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.ultima)) {
+          data.ultima.forEach((value, index) => {
+            if (ultimaChecks[index]) ultimaChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.ultimaSkip)) {
+          data.ultimaSkip.forEach((value, index) => {
+            if (ultimaSkipChecks[index]) ultimaSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.dragonic)) {
+          data.dragonic.forEach((value, index) => {
+            if (dragonicChecks[index]) dragonicChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.dragonicSkip)) {
+          data.dragonicSkip.forEach((value, index) => {
+            if (dragonicSkipChecks[index]) dragonicSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.destructionStages)) {
+          data.destructionStages.forEach((value, index) => {
+            if (destructionStageChecks[index]) destructionStageChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.destructionSkip)) {
+          data.destructionSkip.forEach((value, index) => {
+            if (destructionSkipChecks[index]) destructionSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.heroAtk)) {
+         data.heroAtk.forEach((value, index) => {
+          if (heroAtkChecks[index]) heroAtkChecks[index].checked = value;
+        });
+      }
+if (Array.isArray(data.heroDef)) {
+  data.heroDef.forEach((value, index) => {
+    if (heroDefChecks[index]) heroDefChecks[index].checked = value;
+  });
+}
+if (Array.isArray(data.heroSkip)) {
+  data.heroSkip.forEach((value, index) => {
+    if (heroSkipChecks[index]) heroSkipChecks[index].checked = value;
+  });
+}
+
+        if (Array.isArray(data.other)) {
+          data.other.forEach((value, index) => {
+            if (otherChecks[index]) otherChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.otherSkip)) {
+          data.otherSkip.forEach((value, index) => {
+            if (otherSkipChecks[index]) otherSkipChecks[index].checked = value;
+          });
+        }
+
+        if (Array.isArray(data.bullets)) {
+          data.bullets.forEach((value, index) => {
+            if (bulletChecks[index]) bulletChecks[index].checked = value;
+          });
+        }
+        if (Array.isArray(data.bulletSkip)) {
+          data.bulletSkip.forEach((value, index) => {
+            if (bulletSkipChecks[index]) bulletSkipChecks[index].checked = value;
+          });
+        }
+
+        if (data.monthlyExchange !== undefined) monthlyExchangeInput.value = data.monthlyExchange;
+        if (data.monthlySkip !== undefined) monthlySkip.checked = data.monthlySkip;
+      } catch (error) {
+        console.error("保存データの読み込みに失敗しました:", error);
+      }
+
+
+    }
+
+    function normalizeLoadedState() {
+      summons.forEach((_, index) => {
+        const group = getGroupNodes(summonStageChecks, index).sort((a, b) => Number(a.dataset.stage) - Number(b.dataset.stage));
+        let maxChecked = -1;
+        group.forEach(input => {
+          if (input.checked) maxChecked = Math.max(maxChecked, Number(input.dataset.stage));
+        });
+        group.forEach(input => {
+          input.checked = Number(input.dataset.stage) <= maxChecked;
+        });
+      });
+
+      magna.forEach((_, index) => {
+        const group = getGroupNodes(magnaStageChecks, index).sort((a, b) => Number(a.dataset.stage) - Number(b.dataset.stage));
+        let maxChecked = -1;
+        group.forEach(input => {
+          if (input.checked) maxChecked = Math.max(maxChecked, Number(input.dataset.stage));
+        });
+        group.forEach(input => {
+          input.checked = Number(input.dataset.stage) <= maxChecked;
+        });
+      });
+
+      destructionWeapons.forEach((_, index) => {
+       const group = getGroupNodes(destructionStageChecks, index).sort((a, b) => Number(a.dataset.stage) - Number(b.dataset.stage));
+       let maxChecked = -1;
+       group.forEach(input => {
+         if (input.checked) maxChecked = Math.max(maxChecked, Number(input.dataset.stage));
+        });
+       group.forEach(input => {
+         input.checked = Number(input.dataset.stage) <= maxChecked;
+        });
+     });
+
+      astrals.forEach((_, index) => {
+        if (astralChecks[index].checked) astralSkipChecks[index].checked = false;
+        if (astralSkipChecks[index].checked) astralChecks[index].checked = false;
+      });
+
+      ultimas.forEach((_, index) => {
+        if (ultimaChecks[index].checked) ultimaSkipChecks[index].checked = false;
+        if (ultimaSkipChecks[index].checked) ultimaChecks[index].checked = false;
+      });
+
+      dragonics.forEach((_, index) => {
+        if (dragonicChecks[index].checked) dragonicSkipChecks[index].checked = false;
+        if (dragonicSkipChecks[index].checked) dragonicChecks[index].checked = false;
+      });
+
+      // 英雄武器は「予定なし」とチェックを共存させるので何もしない
+
+      otherItems.forEach((_, index) => {
+        if (otherChecks[index].checked) otherSkipChecks[index].checked = false;
+        if (otherSkipChecks[index].checked) otherChecks[index].checked = false;
+      });
+
+      bullets.forEach((_, index) => {
+        if (bulletChecks[index].checked) bulletSkipChecks[index].checked = false;
+        if (bulletSkipChecks[index].checked) bulletChecks[index].checked = false;
+      });
+
+      if (monthlySkip.checked) {
+        monthlyExchangeInput.value = 0;
+      }
+    }
+
+    function getStats() {
+      clampMonthly();
+
+      const summonStageCount = countChecked(summonStageChecks);
+      const bahamutCount = getGroupNodes(summonStageChecks, 0).filter(input => input.checked).length;
+      const luciferCount = getGroupNodes(summonStageChecks, 1).filter(input => input.checked).length;
+      const summonUsed = summonStageCount * 3;
+      const summonSkipped = summons.reduce((sum, item, index) => {
+        if (!summonSkipChecks[index].checked) return sum;
+
+        const usedForThisSummon = getGroupNodes(summonStageChecks, index).filter(input => input.checked).length * 3;
+          return sum + Math.max(item.maxWeight - usedForThisSummon, 0);
+      }, 0);
+
+      const magnaCount = countChecked(magnaStageChecks);
+      const magnaUsed = magnaCount;
+      const magnaSkipped = magna.reduce((sum, item, index) => {
+        if (!magnaSkipChecks[index].checked) return sum;
+
+       const usedForThisMagna = getGroupNodes(magnaStageChecks, index).filter(input => input.checked).length;
+         return sum + Math.max(item.maxWeight - usedForThisMagna, 0);
+      }, 0);
+
+      const astralUsed = countChecked(astralChecks) * 3;
+      const astralSkipped = countChecked(astralSkipChecks) * 3;
+
+      const ultimaUsed = countChecked(ultimaChecks);
+      const ultimaSkipped = countChecked(ultimaSkipChecks);
+
+      const dragonicUsed = countChecked(dragonicChecks);
+      const dragonicSkipped = countChecked(dragonicSkipChecks);
+
+     let destructionUsed = 0;
+let destructionSkipped = 0;
+
+destructionWeapons.forEach((_, index) => {
+  const stageInputs = getGroupNodes(destructionStageChecks, index);
+  const skipChecked = destructionSkipChecks[index]?.checked;
+
+  let usedForThisWeapon = 0;
+
+  stageInputs.forEach(input => {
+    if (input.checked) {
+      const stageIndex = Number(input.dataset.stage);
+      usedForThisWeapon += DESTRUCTION_STAGE_LABELS[stageIndex].weight;
+    }
+  });
+
+  destructionUsed += usedForThisWeapon;
+
+  if (skipChecked) {
+    const remainingForThisWeapon = Math.max(10 - usedForThisWeapon, 0);
+    destructionSkipped += remainingForThisWeapon;
+  }
+});
+
+      const heroUsed = heroWeapons.reduce((sum, _, index) => {
+        let used = 0;
+          if (heroAtkChecks[index].checked) used += 1;
+          if (heroDefChecks[index].checked) used += 1;
+          return sum + used;
+      }, 0);
+
+      const heroSkipped = heroWeapons.reduce((sum, _, index) => {
+        if (!heroSkipChecks[index].checked) return sum;
+
+        let used = 0;
+        if (heroAtkChecks[index].checked) used += 1;
+        if (heroDefChecks[index].checked) used += 1;
+
+        return sum + Math.max(2 - used, 0);
+      }, 0);
+
+      const otherUsed = Array.from(otherChecks).reduce((sum, input, index) => {
+        return sum + (input.checked ? otherItems[index].weight : 0);
+      }, 0);
+      const otherSkipped = Array.from(otherSkipChecks).reduce((sum, input, index) => {
+        return sum + (input.checked ? otherItems[index].weight : 0);
+      }, 0);
+
+      const bulletUsed = Array.from(bulletChecks).reduce((sum, input, index) => {
+        return sum + (input.checked ? bullets[index].weight : 0);
+      }, 0);
+      const bulletSkipped = Array.from(bulletSkipChecks).reduce((sum, input, index) => {
+        return sum + (input.checked ? bullets[index].weight : 0);
+      }, 0);
+
+      const monthlyValue = monthlySkip.checked ? 0 : (Number(monthlyExchangeInput.value) || 0);
+
+      const fixedBaseTotal = 185;
+      const adjustedTotalRequired =
+        fixedBaseTotal -
+        summonSkipped -
+        magnaSkipped -
+        astralSkipped -
+        ultimaSkipped -
+        dragonicSkipped -
+        destructionSkipped -
+        heroSkipped -
+        otherSkipped -
+        bulletSkipped +
+        monthlyValue;
+
+      const usedTotal =
+        summonUsed +
+        magnaUsed +
+        astralUsed +
+        ultimaUsed +
+        dragonicUsed +
+        destructionUsed +
+        heroUsed +
+        otherUsed +
+        bulletUsed;
+
+      const remaining = Math.max(adjustedTotalRequired - usedTotal, 0);
+      const percent = adjustedTotalRequired === 0
+        ? 100
+        : Math.min(Math.floor((usedTotal / adjustedTotalRequired) * 100), 100);
+
+      return {
+        bahamutCount,
+        luciferCount,
+        magnaCount,
+        summonUsed,
+        magnaUsed,
+        astralUsed,
+        ultimaUsed,
+        dragonicUsed,
+        destructionUsed,
+        heroUsed,
+        otherUsed,
+        bulletUsed,
+        monthlyValue,
+        usedTotal,
+        adjustedTotalRequired,
+        remaining,
+        percent
+      };
+    }
+
+    function buildCopyText() {
+      const stats = getStats();
+
+      return [
+        "砂進捗",
+        `総必要数: ${stats.adjustedTotalRequired}`,
+        `使用済み合計: ${stats.usedTotal}`,
+        `残り必要数: ${stats.remaining}`,
+        `進捗率: ${stats.percent}%`,
+        `バハ段階: ${stats.bahamutCount}/5`,
+        `ルシ段階: ${stats.luciferCount}/5`,
+        `マグナ段階: ${stats.magnaCount}/18`,
+        `礎武器: ${countChecked(astralChecks)}/10`,
+        `終末250: ${countChecked(ultimaChecks)}/12`,
+        `ドラポン: ${countChecked(dragonicChecks)}/6`,
+        `英雄武器: ${stats.heroUsed}/18`,
+        `破壊武器使用数: ${stats.destructionUsed}/60`,
+        `その他達成数: ${countChecked(otherChecks)}/${otherItems.length}`,
+        `バレット使用数: ${stats.bulletUsed}/7`,
+      ].join("\n");
+    }
+
+    function calc() {
+      syncMonthlyState();
+      updateSkippedStyles();
+
+      const stats = getStats();
+
+      document.getElementById("targetResult").textContent = stats.adjustedTotalRequired;
+      document.getElementById("usedTotal").textContent = stats.usedTotal;
+      document.getElementById("remaining").textContent = stats.remaining;
+      document.getElementById("bahamutCount").textContent = stats.bahamutCount;
+      document.getElementById("luciferCount").textContent = stats.luciferCount;
+      document.getElementById("magnaCount").textContent = stats.magnaCount;
+      document.getElementById("percentText").textContent = stats.percent + "%";
+      document.getElementById("progressBar").style.width = stats.percent + "%";
+      document.getElementById("copyText").value = buildCopyText();
+      document.getElementById("floatingTarget").textContent = stats.adjustedTotalRequired;
+      document.getElementById("floatingUsed").textContent = stats.usedTotal;
+      document.getElementById("floatingRemaining").textContent = stats.remaining;
+      document.getElementById("floatingPercent").textContent = stats.percent + "%";
+      document.getElementById("floatingRemainingMini").textContent = stats.remaining;
+
+      const message = document.getElementById("message");
+
+      if (stats.usedTotal === 0) {
+        message.textContent = "数値やチェックを変更すると自動で保存・計算されます。";
+        message.style.background = "#fff7ed";
+        message.style.borderColor = "#fed7aa";
+        message.style.color = "#9a3412";
+      } else if (stats.remaining === 0) {
+        message.textContent = "必要数は達成済みです。かなりつよい。";
+        message.style.background = "#ecfdf5";
+        message.style.borderColor = "#a7f3d0";
+        message.style.color = "#065f46";
+      } else {
+        message.textContent = `総必要数まであと ${stats.remaining} 個です。`;
+        message.style.background = "#fef2f2";
+        message.style.borderColor = "#fecaca";
+        message.style.color = "#991b1b";
+      }
+
+      saveState();
+    }
+
+    summonStageChecks.forEach(input => {
+      input.addEventListener("change", () => {
+        const index = Number(input.dataset.index);
+        const stage = Number(input.dataset.stage);
+        syncSequentialGroup(summonStageChecks, index, stage);
+        summonSkipChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    summonSkipChecks.forEach((input) => {
+      input.addEventListener("change", () => {
+      calc();
+      });
+    });
+
+    magnaStageChecks.forEach(input => {
+  input.addEventListener("change", () => {
+    const index = Number(input.dataset.index);
+    const stage = Number(input.dataset.stage);
+    syncSequentialGroup(magnaStageChecks, index, stage);
+    magnaSkipChecks[index].checked = false;
+    calc();
+  });
+});
+
+magnaSkipChecks.forEach((input) => {
+  input.addEventListener("change", () => {
+    calc();
+  });
+});
+
+    astralChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        syncSkipPair(input, astralSkipChecks[index]);
+        calc();
+      });
+    });
+
+    astralSkipChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        if (input.checked) astralChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    ultimaChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        syncSkipPair(input, ultimaSkipChecks[index]);
+        calc();
+      });
+    });
+
+    ultimaSkipChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        if (input.checked) ultimaChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    dragonicChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        syncSkipPair(input, dragonicSkipChecks[index]);
+        calc();
+      });
+    });
+
+    dragonicSkipChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        if (input.checked) dragonicChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    destructionStageChecks.forEach(input => {
+      input.addEventListener("change", () => {
+        const index = Number(input.dataset.index);
+        const stage = Number(input.dataset.stage);
+        syncSequentialGroup(destructionStageChecks, index, stage);
+        calc();
+      });
+    });
+
+    destructionSkipChecks.forEach(input => {
+      input.addEventListener("change", () => {
+        calc();
+      });
+    });
+
+    heroAtkChecks.forEach((input) => {
+      input.addEventListener("change", () => {
+        calc();
+      });
+    });
+
+    heroDefChecks.forEach((input) => {
+      input.addEventListener("change", () => {
+        calc();
+      });
+    });
+
+    heroSkipChecks.forEach((input) => {
+      input.addEventListener("change", () => {
+        calc();
+      });
+    });
+    otherChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        syncSkipPair(input, otherSkipChecks[index]);
+        calc();
+      });
+    });
+
+    otherSkipChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        if (input.checked) otherChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    bulletChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        syncSkipPair(input, bulletSkipChecks[index]);
+        calc();
+      });
+    });
+
+    bulletSkipChecks.forEach((input, index) => {
+      input.addEventListener("change", () => {
+        if (input.checked) bulletChecks[index].checked = false;
+        calc();
+      });
+    });
+
+    monthlyExchangeInput.addEventListener("input", calc);
+    monthlySkip.addEventListener("change", calc);
+
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      const text = buildCopyText();
+      const textarea = document.getElementById("copyText");
+      textarea.value = text;
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        textarea.select();
+        document.execCommand("copy");
+      }
+
+      const message = document.getElementById("message");
+      message.textContent = "コピペ用テキストをコピーしました。";
+      message.style.background = "#eff6ff";
+      message.style.borderColor = "#bfdbfe";
+      message.style.color = "#1d4ed8";
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      summonStageChecks.forEach(input => input.checked = false);
+      summonSkipChecks.forEach(input => input.checked = false);
+
+      magnaStageChecks.forEach(input => input.checked = false);
+      magnaSkipChecks.forEach(input => input.checked = false);
+
+      astralChecks.forEach(input => input.checked = false);
+      astralSkipChecks.forEach(input => input.checked = false);
+
+      ultimaChecks.forEach(input => input.checked = false);
+      ultimaSkipChecks.forEach(input => input.checked = false);
+
+      dragonicChecks.forEach(input => input.checked = false);
+      dragonicSkipChecks.forEach(input => input.checked = false);
+
+      destructionStageChecks.forEach(input => input.checked = false);
+      destructionSkipChecks.forEach(input => input.checked = false);
+
+      heroAtkChecks.forEach(input => input.checked = false);
+      heroDefChecks.forEach(input => input.checked = false);
+      heroSkipChecks.forEach(input => input.checked = false);
+
+      otherChecks.forEach(input => input.checked = false);
+      otherSkipChecks.forEach(input => input.checked = false);
+
+      bulletChecks.forEach(input => input.checked = false);
+      bulletSkipChecks.forEach(input => input.checked = false);
+
+      monthlyExchangeInput.value = 0;
+      monthlySkip.checked = false;
+      monthlyExchangeInput.disabled = false;
+
+      localStorage.removeItem(STORAGE_KEY);
+      calc();
+    });
+
+    loadState();
+    normalizeLoadedState();
+    syncMonthlyState();
+    updateSkippedStyles();
+    calc();
+
+    let floatingClosed = false;
+
+function updateFloatingSummary() {
+  floatingSummary.classList.toggle("is-collapsed", floatingClosed);
+  floatingBody.hidden = floatingClosed;
+  floatingCollapsed.hidden = !floatingClosed;
+  floatingToggle.textContent = floatingClosed ? "+" : "−";
+  floatingToggle.setAttribute("aria-expanded", String(!floatingClosed));
+}
+
+floatingToggle.addEventListener("click", () => {
+  floatingClosed = !floatingClosed;
+  updateFloatingSummary();
+});
+
+floatingCollapsed.addEventListener("click", () => {
+  floatingClosed = false;
+  updateFloatingSummary();
+});
+
+document.getElementById("tweetBtn").addEventListener("click", () => {
+  const text = encodeURIComponent(buildTweetText());
+  const url = `https://twitter.com/intent/tweet?text=${text}`;
+  window.open(url, "_blank");
+});
+
+function buildTweetText() {
+  const stats = getStats();
+  const lines = ["砂進捗"];
+
+  if (document.getElementById("tweetTarget").checked) {
+    lines.push(`総必要数: ${stats.adjustedTotalRequired}`);
+  }
+
+  if (document.getElementById("tweetUsed").checked) {
+    lines.push(`使用済み合計: ${stats.usedTotal}`);
+  }
+
+  if (document.getElementById("tweetRemaining").checked) {
+    lines.push(`残り必要数: ${stats.remaining}`);
+  }
+
+  if (document.getElementById("tweetPercent").checked) {
+    lines.push(`進捗率: ${stats.percent}%`);
+  }
+
+  if (document.getElementById("tweetBahamut").checked) {
+    lines.push(`バハ段階: ${stats.bahamutCount}/5`);
+  }
+
+  if (document.getElementById("tweetLucifer").checked) {
+    lines.push(`ルシ段階: ${stats.luciferCount}/5`);
+  }
+
+  if (document.getElementById("tweetMagna").checked) {
+    lines.push(`マグナ段階: ${stats.magnaCount}/18`);
+  }
+
+  if (document.getElementById("tweetAstral").checked) {
+    lines.push(`礎武器: ${countChecked(astralChecks)}/10`);
+  }
+
+  if (document.getElementById("tweetUltima").checked) {
+    lines.push(`終末250: ${countChecked(ultimaChecks)}/12`);
+  }
+
+  if (document.getElementById("tweetDragonic").checked) {
+    lines.push(`ドラポン: ${countChecked(dragonicChecks)}/6`);
+  }
+
+  if (document.getElementById("tweetHero").checked) {
+    lines.push(`英雄武器: ${stats.heroUsed}/18`);
+  }
+
+  if (document.getElementById("tweetDestruction").checked) {
+    lines.push(`破壊武器使用数: ${stats.destructionUsed}/60`);
+  }
+
+  if (document.getElementById("tweetBullet").checked) {
+    lines.push(`バレット使用数: ${stats.bulletUsed}/7`);
+  }
+
+  if (document.getElementById("tweetUrl").checked) {
+    lines.push(location.href);
+  }
+
+  lines.push("#砂電卓");
+
+  return lines.join("\n");
+}
+
+document.querySelectorAll(".collapse-header").forEach(header => {
+  header.addEventListener("click", () => {
+    const section = header.closest(".collapsible");
+    section.classList.toggle("open");
+  });
+});
+  </script>
+</body>
+</html>

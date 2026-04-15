@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>GBF素材管理ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Yu Gothic", sans-serif;
+      background: #f6f9ff;
+      color: #1f2937;
+    }
+
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 24px 16px;
+}
+
+.hero {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+h1 {
+  margin: 0 0 10px;
+}
+
+.desc {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  border-color: #93c5fd;
+  background: #f8fbff;
+}
+
+.card:active {
+  transform: translateY(-1px);
+}
+
+.card::after {
+  content: "→";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #60a5fa;
+  opacity: 0.85;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+  padding-right: 28px;
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.footer {
+  margin-top: 30px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.6;
+}
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>GBF素材管理ツール</h1>
+    <div class="desc">
+      グランブルーファンタジーの希少素材（ヒヒイロカネなど）の使用状況を管理できる非公式ツールです。<br>
+      各素材ごとの進捗や必要数を簡単に確認できます。
+    </div>
+    <div style="margin-top: 12px;">
+  <a href="howto.html" style="font-size: 0.9rem; color: #3b82f6; text-decoration: none;">
+    ▶ 使い方を見る
+  </a>
+</div>
+  </div>
+
+  <div class="grid">
+
+<a href="hihi.html" class="card">
+  <div class="card-title">ヒヒイロカネ進捗計算機</div>
+  <div class="card-desc">
+    十天衆・終末武器・破壊武器・バレットなどへの使用状況を管理できます。<br>
+    <span style="font-size: 0.85em; color: #6b7280;">通称：ヒヒ電卓</span>
+  </div>
+</a>
+
+<a href="suna.html" class="card">
+  <div class="card-title">刻の流砂進捗計算機</div>
+  <div class="card-desc">
+    プロヴィデンス召喚石・マグナ召喚石・礎武器・終末武器・ドラポン・破壊武器・英雄武器・バレットなどへの使用状況を管理できます。<br>
+    <span style="font-size: 0.85em; color: #6b7280;">通称：砂電卓</span>
+  </div>
+</a>
+
+<a href="#" class="card">
+  <div class="card-title">金剛晶計算機（準備中）</div>
+  <div class="card-desc">
+    召喚石ごとの使用状況を管理予定。
+  </div>
+</a>
+
+<a href="howto.html" class="card">
+  <div class="card-title">使い方</div>
+  <div class="card-desc">
+    各素材管理ツールの使い方や仕様について解説しています。
+  </div>
+</a>
+
+  </div>
+
+<div class="footer">
+
+  <div class="footer-links">
+    <a href="privacy.html">プライバシーポリシー</a>
+    <span>｜</span>
+    <a href="disclaimer.html">免責事項</a>
+    <span>｜</span>
+    <a href="contact.html">お問い合わせ</a>
+  </div>
+
+
+  <div class="footer-text">
+    本サイトはグランブルーファンタジーの非公式ファンツールです。<br>
+    株式会社Cygamesとは関係ありません。
+  </div>
+
+</div>
+
+</div>
+
+</body>
+</html>
