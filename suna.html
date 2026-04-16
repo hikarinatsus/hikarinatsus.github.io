@@ -871,9 +871,21 @@
     ];
 
     const astrals = [
-      "礎武器1", "礎武器2", "礎武器3", "礎武器4", "礎武器5",
-      "礎武器6", "礎武器7", "礎武器8", "礎武器9", "礎武器10"
-    ];
+      { name: "ヒート･オブ･ザ･サン(アラナン)", element: "fire" },
+      { name: "キス･オブ･ザ･デビル(フラウ)", element: "fire" },
+
+      { name: "リフレクト･オブ･ザ･ムーン(ハーゼリーラ)", element: "water" },
+      { name: "ライズ･オブ･ジャスティス(マリア・テレサ)", element: "water" },
+
+      { name: "タイ･オブ･ザ･ハングドマン(カイム)", element: "earth" },
+      { name: "クラッシュ･オブ･ザ･タワー (ロベリア)", element: "earth" },
+
+      { name: "メロディ･オブ･ジャッジメント(カッツェリーラ)", element: "wind" },
+      { name: "プレイ･オブ･テンペランス (エスタリオラ)", element: "wind" },
+
+      { name: "ショット･オブ･ザ･スター(ガイゼンボーガ)", element: "light" },
+      { name: "ペイン･オブ･デス(ニーア)", element: "dark" }
+];
 
     const ultimas = [
       { name: "火(マグナ)", element: "fire" },
@@ -977,16 +989,17 @@ const otherItems = [
       `);
     });
 
-    astrals.forEach((name, index) => {
-      astralGrid.insertAdjacentHTML("beforeend", `
-        <div class="item-card" id="astralCard${index}">
-          <div class="item-name">${name}</div>
+    astrals.forEach((item, index) => {
+  astralGrid.insertAdjacentHTML("beforeend", `
+    <div class="item-card element-card ${item.element}" id="astralCard${index}">
+      <div class="item-name">${item.name}</div>
           <div class="checks">
             <label><input type="checkbox" class="astral-check" data-index="${index}"> 5凸</label>
             <label><input type="checkbox" class="astral-skip-check" data-index="${index}"> 予定なし</label>
           </div>
           <div class="item-help">1本ごとに 3 個使用します。</div>
         </div>
+        
       `);
     });
 
